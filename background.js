@@ -25,7 +25,15 @@ const strMatchCnt = (src, tgt) => {
 }
 
 const procStr = str => {
-  return str.toLowerCase().replace(/[^A-Z, a-z0-9]/g, '').replace(/\s/g, '+')
+  const subStr = str.split(' ')
+  let newStr = ''
+  for (let i = 0; i < subStr.length; i++) {
+    newStr += subStr[i] + ' '
+    console.log(subStr[i])
+    console.log(subStr[i].match(/[0-9,()]/g))
+    if (subStr[i].match(/[0-9,()]/g) !== null) break
+  }
+  return newStr.toLowerCase().replace(/[^A-Z, a-z0-9]/g, '').replace(/\s/g, '+')
 }
 
 const sendReq = (title, origin) => {
@@ -38,10 +46,12 @@ const sendReq = (title, origin) => {
     sendMsg(prod)
   }
   let reqUrl = ''
-  if (origin == site.AMAZON)
-    reqUrl = `https://cors-anywhere-98927.herokuapp.com/ebay.com/sch/i.html?_from=R40&_trksid=p2380057.m570.l1313&_nkw=${procStr(title)}_sacat=0_from=R40`
-
-  else if (origin == site.EBAY) reqUrl = `https://cors-anywhere-98927.herokuapp.com/www.amazon.com/s?k=${procStr(title)}&rh=n%3A2811119011&ref=nb_sb_noss`
+  console.log(procStr(title))
+  console.log(origin === site.EBAY)
+  if (origin === site.AMAZON)
+    reqUrl = `https://cors-anywhere-98927.herokuapp.com/ebay.com/sch/i.html?_from=R40&_trksid=p2380057.m570.l1313&_nkw=${procStr(title)}&_sacat=0`
+  else if (origin === site.EBAY) reqUrl = `https://cors-anywhere-98927.herokuapp.com/amazon.com/s/ref=nb_sb_noss?url=search-alias%3Daps&field-keywords=${procStr(title)}`
+  console.log(reqUrl)
   req.open('GET', reqUrl, 'true')
   req.setRequestHeader('x-requested-with', 'XMLHttpRequest')
   req.send()
@@ -59,16 +69,18 @@ const parseEbay = (str, title) => {
   const titles = el.getElementsByClassName('s-item__title')
   let products = []
   for (let i = 0; i < 10; i++) {
-    if (titles[i] === undefined) break
-    if (titles[i].innerText === 'Shop on eBay') continue
-    let price = titles[i].parentElement.nextElementSibling.nextElementSibling.children[0].children[0].innerText.split('$')[1]
+    if (titles[i] === undefined || titles[i].innerText === 'Shop on eBay') continue
+    console.log(titles[i])
+    let price = titles[i].parentElement.nextElementSibling.nextElementSibling.getElementsByTagName('span')[0].innerText.split('$')[1]
+    console.log(price)
     if (isNaN(price)) continue
-    products.push(new Product(titles[i].innerText, price, titles[i].parentElement.href, titles[i].parentElement.parentElement.previousElementSibling.children[0].children[0].children[0].children[1].src, null))
+    products.push(new Product(titles[i].innerText, price, titles[i].parentElement.href, titles[i].parentElement.parentElement.previousElementSibling.getElementsByTagName('img')[0].src, null))
   }
   for (let j = 0; j < products.length; j++) {
     products[j].match = strMatchCnt(products[j].name, title)
   }
   products.sort((a, b) => b.match - a.match)
+  console.log(products)
   return products[0]
 }
 
@@ -76,14 +88,13 @@ const parseAmazon = (str, title) => {
   const el = document.createElement('html')
   console.log('on amazon')
   el.innerHTML = str
-  const titles = el.getElementsByClassName('a-size-base-plus')
-  console.log(titles)
+  const titles = el.getElementsByClassName('a-size-medium')
   let products = []
   for (let i = 0; i < 4; i++) {
-    if (titles[i] === undefined) break
-    let price = titles[i].parentElement.parentElement.parentElement.nextElementSibling.nextElementSibling.children[0].children[0].children[0].children[0].innerText.split('$')[1]
+    if (titles[i] === undefined || titles[i].nodeName === 'H2' || titles[i].children?.length > 0) continue
+    let price = titles[i].parentElement.parentElement.parentElement.nextElementSibling.nextElementSibling.getElementsByTagName('span')[0].innerText.split('$')[1]
     if (isNaN(price)) continue
-    products.push(new Product(titles[i].innerText, price, titles[i].parentElement.href, titles[i].parentElement.parentElement.parentElement.parentElement.previousElementSibling.children[0].children[0].children[0].children[0].src, null))
+    products.push(new Product(titles[i].innerText, price, titles[i].parentElement.href, titles[i].parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.previousElementSibling.getElementsByTagName('img')[0].src, null))
   }
   for (let j = 0; j < products.length; j++) {
     products[j].match = strMatchCnt(products[j].name, title)
@@ -95,7 +106,7 @@ const parseAmazon = (str, title) => {
 if (window.sessionStorage !== 'undefined' && document.URL.indexOf(site.AMAZON) > -1 || document.URL.indexOf(site.EBAY) > -1) {
   if (document.URL.indexOf(site.AMAZON) > -1) currSite = site.AMAZON
   else if (document.URL.indexOf(site.EBAY) > -1) currSite = site.EBAY
-  if (currSite == site.AMAZON) {
+  if (currSite === site.AMAZON) {
     if (document.querySelector('#buy-now-button')) {
       console.log('product found! loading data...')
       sendMsg('loading')
@@ -103,7 +114,7 @@ if (window.sessionStorage !== 'undefined' && document.URL.indexOf(site.AMAZON) >
       sendReq(title, site.AMAZON)
     }
   }
-  else if (currSite == site.EBAY) {
+  else if (currSite === site.EBAY) {
     if (document.querySelector('#binBtn_btn')) {
       console.log('product found! loading data...')
       sendMsg('loading')
