@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+
+  <title>popup</title>
+  <style>
+    .title {
+      font-size: 12px;
+      font-weight: bold;
+      text-align: center;
+    }
+
+
+    .loader {
+      position: absolute;
+      left: 44%;
+      top: 35%;
+      border: 6px solid #f3f3f3;
+      border-top: 6px solid #3498db;
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      animation: spin 2s linear infinite;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    div.container {
+      align-items: center;
+      width: 350px;
+      height: 150px;
+      background-color: #cacaca;
+      top: 0;
+      left: 0;
+      z-index: 1;
+
+    }
+
+    div.pic-container {
+      position: absolute;
+      width: 100px;
+      height: 100px;
+      top: 60px;
+      left: 30px;
+      grid-template-rows: auto auto;
+      display: grid;
+      grid-template-columns: auto auto auto auto;
+      grid-gap: 10px;
+    }
+
+    div.row {
+      grid-row: auto;
+      width: 200px;
+    }
+
+    .prod-pic {
+      width: 100px;
+      height: 100px;
+
+    }
+
+    .prod-price {
+      font-size: 12px;
+    }
+  </style>
+</head>
+
+<body>
+  <script type="text/javascript" src="popup.js"></script>
+  <h3 class="title">
+    OjoPrice
+  </h3>
+  <div class="loader" hidden="true"></div>
+  <div class="container">
+    <div class="pic-container">
+      <img class="prod-pic">
+      <div class="row">
+        <a target="_blank" class="prod-title"></a>
+        <p class="prod-price"></p>
+        </a>
+      </div>
+    </div>
+
+  </div>
+</body>
+
+</html>

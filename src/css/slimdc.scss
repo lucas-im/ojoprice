@@ -1,0 +1,39 @@
+body {
+  #search_wrap,.dc_logo{display: none;}
+  .dchead{height:6px;}
+  .gnb_bar{display:none;}
+  .right_content{display:none;}
+  .list_wrap, .view_wrap{min-width:840px;}
+  .listwrap{
+    .issuebox .concept_wrap{display:none;}
+    .issue_contentbox { display: none; }
+  }
+  .wrap_inner{width:840px;}
+  .width1160{
+    .dchead,.gnb,#container,.info_policy,.copyright {
+      width: 840px;
+    }
+    .newvisit_history{
+      width: 840px;
+    }
+    .under_catelist.newvisit_layer {
+      width: 814px;
+    }
+  }
+  .visit_list {
+    width: 680px;
+    li a {width: 107px;}
+  }
+  .dc_all{display:none;}
+  #write_wrap { padding: 0; border: none; }
+  .visit_history{width: 814px;}
+
+  .cmt_nickbox {margin-right: 3px;width: 110px;}
+  .usertxt, .comment_wrap .comment_dccon {width: 610px;}
+  .reply {
+    .cmt_nickbox {margin-right: 3px;width: 110px;}
+    .usertxt, .comment_wrap .comment_dccon {width: 540px;}
+  }
+  .cmt_txt_cont textarea{width: 634px;}
+  .cmt_write_box.small .cmt_txt_cont textarea{width: 602px;}
+}

@@ -1,0 +1,43 @@
+{
+  "version": "1",
+  "author": "-",
+  "action": {
+    "default_icon": {
+      "19": "icons/icon19.png"
+    },
+    "default_title": "popup",
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "js": [
+        "background.js"
+      ],
+      "matches": [
+        "*://*.amazon.com/*",
+        "*://*.ebay.com/*"
+      ],
+      "run_at": "document_end"
+    }
+  ],
+  "description": "test",
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "manifest_version": 3,
+  "name": "ojoprice",
+  "permissions": [
+    "contextMenus",
+    "storage",
+    "webRequest",
+    "tabs"
+  ],
+  "host_permissions": [
+    "*://*.amazon.com/*",
+    "*://*.ebay.com/*"
+  ],
+  "short_name": "ojoprice"
+}
