@@ -25,13 +25,16 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
             loader.hidden = true
             break
         default:
+            const title = document.querySelector('.title')
             const pic = document.querySelector('.prod-pic')
-            const title = document.querySelector('.prod-title')
+            const prTitle = document.querySelector('.prod-title')
             const price = document.querySelector('.prod-price')
             pic.src = msg.imgUrl
-            title.innerText = msg.name
-            title.href = msg.url
+            prTitle.innerText = msg.name
+            prTitle.href = msg.url
             price.innerText = msg.price + '$'
+            if (msg.url.indexOf('amazon') > -1) title.innerText = 'Search result from eBay.com'
+            else if (msg.url.indexOf('ebay') > -1) title.innerText = 'Search result from Amazon.com'
             break
     }
 })

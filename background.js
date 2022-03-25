@@ -29,8 +29,6 @@ const procStr = str => {
   let newStr = ''
   for (let i = 0; i < subStr.length; i++) {
     newStr += subStr[i] + ' '
-    console.log(subStr[i])
-    console.log(subStr[i].match(/[0-9,()]/g))
     if (subStr[i].match(/[0-9,()]/g) !== null) break
   }
   return newStr.toLowerCase().replace(/[^A-Z, a-z0-9]/g, '').replace(/\s/g, '+')
@@ -44,6 +42,7 @@ const sendReq = (title, origin) => {
     console.log(prod)
     sendMsg('loaded')
     sendMsg(prod)
+    postToWp(prod)
   }
   let reqUrl = ''
   console.log(procStr(title))
@@ -94,12 +93,13 @@ const parseAmazon = (str, title) => {
     if (titles[i] === undefined || titles[i].nodeName === 'H2' || titles[i].children?.length > 0) continue
     let price = titles[i].parentElement.parentElement.parentElement.nextElementSibling.nextElementSibling.getElementsByTagName('span')[0].innerText.split('$')[1]
     if (isNaN(price)) continue
-    products.push(new Product(titles[i].innerText, price, titles[i].parentElement.href, titles[i].parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.previousElementSibling.getElementsByTagName('img')[0].src, null))
+    products.push(new Product(titles[i].innerText, price, titles[i].parentElement.href.replace('ebay.com', 'amazon.com'), titles[i].parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.previousElementSibling.getElementsByTagName('img')[0].src, null))
   }
   for (let j = 0; j < products.length; j++) {
     products[j].match = strMatchCnt(products[j].name, title)
   }
   products.sort((a, b) => b.match - a.match)
+  console.log(products[0])
   return products[0]
 }
 
@@ -130,3 +130,50 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   }
 })
 
+postToWp = (prod) => {
+  const pReq = new XMLHttpRequest()
+  pReq.onload = (res) => {
+    const jsonRes = JSON.parse(res.target.response)
+    for (let i = 0; i < jsonRes.length; i++) {
+      console.log(jsonRes[i])
+      const postDate = parseFloat(jsonRes[i].content.rendered.split('datetime&#8221;:')[1].split(',&#8221;')[0])
+      if (procStr(jsonRes[i].title.rendered) === procStr(prod.name)) {
+		//Uncomment to only post in every 12 hours.
+        // if (postDate - new Date().getTime() > 4.32e+7) {
+        console.log('posting to wp')
+        const wpReq = new XMLHttpRequest()
+        wpReq.onload = (res) => {
+          console.log(res.target.response)
+        }
+        wpReq.open('POST', `http://localhost/wp-json/wp/v2/posts/${jsonRes[i].id}`)
+        wpReq.setRequestHeader('Content-Type', 'application/json')
+        wpReq.setRequestHeader('Authorization', 'Basic ' + btoa('june.main.ca@gmail.com:WY0iDkP!&f0@FFItk#gnwuas'))
+        wpReq.send(JSON.stringify({
+          title: prod.name,
+          content: JSON.stringify(jsonRes[i].content.rendered) + JSON.stringify({
+            price: prod.price,
+            datetime: new Date().getTime()
+          }),
+          status: 'publish'
+        }))
+        return
+        // }
+      }
+    }
+    const req = new XMLHttpRequest()
+    req.onload = (res) => {
+      console.log(res.target.response)
+    }
+    req.open('POST', 'http://localhost/wp-json/wp/v2/posts')
+    req.setRequestHeader('Content-Type', 'application/json')
+    req.setRequestHeader('Authorization', 'Basic ' + btoa('june.main.ca@gmail.com:WY0iDkP!&f0@FFItk#gnwuas'))
+    req.send(JSON.stringify({
+      title: prod.name,
+      content: JSON.stringify({ price: prod.price, datetime: new Date().getTime(), url: prod.url }),
+      status: 'publish'
+    }))
+  }
+  pReq.open('GET', 'http://localhost/wp-json/wp/v2/posts')
+  pReq.setRequestHeader('Content-Type', 'application/json')
+  pReq.send()
+}
